@@ -1,11 +1,11 @@
 grammar ProductionRules;
 
 
-rules	:	rule+ '}'
-	;
+rules		:	rule+ '}'
+		;
 	
-rule	:	prs_expr ARROW bool_expr_id dir
-	;
+rule		:	prs_expr ARROW bool_expr_id dir
+		;
 	
 /*prs_expr */	
 prs_expr	:	prs_term ('|' prs_term)*
@@ -17,11 +17,11 @@ prs_term	:	prs_atom  ('&' ('{' dir prs_expr '}')? prs_atom)*
 prs_atom	:	INV? prs_bb
            	;
    
-prs_bb	: 	sized_id
-                  	| 	'(' prs_expr ')'
-                  	|	'@' ID
-                  	|	'(' prs_op ID ':' wint_expr ( '..' wint_expr )? ':' prs_expr ')'
-                  	;
+prs_bb		: 	sized_id
+                | 	'(' prs_expr ')'
+                |	'@' ID
+                |	'(' prs_op ID ':' wint_expr ( '..' wint_expr )? ':' prs_expr ')'
+                ;
    
 prs_op	: 	'&' ':'
          	| 	'|' ':'
@@ -35,18 +35,17 @@ size_spec	: 	'<' wint_expr (',' wint_expr)? ( ':' ID )? '>'
             	;
 
 sized_id	:	bool_expr_id	 size_spec
-	;
-wint_expr
-	:	INT  | ID
-	;
-expr_id	:	base_id ('.' base_id)*
-	;
-base_id	:	ID sparse_range?
-	;
+		;
+wint_expr	:	INT  | ID
+		;
+expr_id		:	base_id ('.' base_id)*
+		;
+base_id		:	ID sparse_range?
+		;
 
 sparse_range
-	:	('[' wint_expr ('..' wint_expr)? ']')+
-                   	;
+		:	('[' wint_expr ('..' wint_expr)? ']')+
+                ;
 
                   
  /*Lexer */
