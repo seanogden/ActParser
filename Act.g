@@ -1,4 +1,5 @@
 grammar Act;
+options { backtrack = true; }
 import ExprParser, ExprLexer;
 
 toplevel
@@ -302,16 +303,16 @@ base_id	:	ID sparse_range?
 sparse_range
 	:	(RBRAC wint_expr (DOTDOT wint_expr)? LBRAC)+
                    	;
-//TODO:  Support for expressions
+//TODO: enforce integer expression here 
 wint_expr
-	:	T_INT | ID
+	:   int;	
+
+w_expr 	: expression 
 	;
-w_expr 	:	ID
-	;
+
+//TODO:  enforce boolean expression here
 wbool_expr
-	:	TRUE
-	|	FALSE
-	;
+	:	TRUE;
 	
 
 // $<HSE
@@ -379,8 +380,8 @@ chp_log_item: expr_id
 send_stmt: expr_id BANG send_data
          ;
 
-send_data: w_expr
-         | LPAREN w_expr (COMMA w_expr)* RPAREN
+send_data: (LPAREN w_expr COMMA)=> LPAREN  expressionList RPAREN
+         | w_expr
          ;
 
 recv_stmt: expr_id QUESTION recv_id
