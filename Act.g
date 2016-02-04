@@ -1,4 +1,5 @@
 grammar Act;
+import ExprParser, ExprLexer;
 
 toplevel
 	:	imports_opens? body?
@@ -111,7 +112,7 @@ defproc_or_cell
           	;
 template_spec
    	: 	EXPORT
-        |	EXPORT? TEMPLATE LT param_inst_list (BAR param_inst_list)? GT
+        |	EXPORT? TEMPLATE LT param_inst_list (OR param_inst_list)? GT
         ;
 param_inst_list
    	:	param_inst (SEMICOLON param_inst)*
@@ -153,7 +154,7 @@ base_item
 	; 
 
 conditional
-	:	LBRACKET guarded_cmds RBRACKET
+	:	RBRAC guarded_cmds LBRAC
 	;
 	
 guarded_cmds
@@ -165,7 +166,7 @@ gc_1
 	;
 	
 loop: LPAREN SEMICOLON ID COLON wint_expr
-        [ DOTDOT wint_expr ] COLON base_item+ RPAREN
+        ( DOTDOT wint_expr )? COLON base_item+ RPAREN
     ;
 
 language_body
@@ -220,11 +221,11 @@ array_term: LBRACE array_expr (COMMA array_expr)* RBRACE
           ;
 
 dense_range
-	:	(options {greedy=true;}: LBRACKET wint_expr RBRACKET)+
+	:	(options {greedy=true;}: RBRAC wint_expr LBRAC)+
 	;
 	
 attr_list
-	: 	LBRACKET ID EQUAL w_expr (SEMICOLON ID EQUAL w_expr)* RBRACKET
+	: 	RBRAC ID EQUAL w_expr (SEMICOLON ID EQUAL w_expr)* LBRAC
 	;
 	
 physical_inst_type
@@ -255,7 +256,7 @@ qualified_type:  COLONCOLON? ID ( COLONCOLON ID)*
               ;
 
            	 
-chan_dir	: QMARK
+chan_dir	: QUESTION
            	| BANG
            	| QMARKBANG
            	| BANGQMARK
@@ -289,7 +290,7 @@ lang_size: SIZE LBRACE RBRACE
 
 
 	
-supply_spec	: 	LT bool_expr_id (COMMA bool_expr_id ) ( BAR bool_expr_id COMMA bool_expr_id )? GT
+supply_spec	: 	LT bool_expr_id (COMMA bool_expr_id ) ( OR bool_expr_id COMMA bool_expr_id )? GT
 	;
              
 bool_expr_id	: 	expr_id
@@ -299,7 +300,7 @@ expr_id	:	base_id (DOT base_id)*
 base_id	:	ID sparse_range?
 	;
 sparse_range
-	:	(LBRACKET wint_expr (DOTDOT wint_expr)? RBRACKET)+
+	:	(RBRAC wint_expr (DOTDOT wint_expr)? LBRAC)+
                    	;
 //TODO:  Support for expressions
 wint_expr
@@ -334,16 +335,16 @@ hse_body_item: hse_assign_stmt (COMMA hse_assign_stmt)*
 hse_assign_stmt: expr_id dir
                ;
 
-hse_select_stmt: LBRACKET hse_guarded_cmd (THICKBAR hse_guarded_cmd)* RBRACKET
-               | LBRACKET wbool_expr RBRACKET
+hse_select_stmt: RBRAC hse_guarded_cmd (THICKBAR hse_guarded_cmd)* LBRAC
+               | RBRAC wbool_expr LBRAC
                ;
 
 hse_guarded_cmd: wbool_expr RIGHTARROW hse_body
                | ELSE RIGHTARROW hse_body
                ;
 
-hse_loop_stmt: STARLBRACKET hse_body RBRACKET
-             | STARLBRACKET hse_guarded_cmd (THICKBAR hse_guarded_cmd)* RBRACKET
+hse_loop_stmt: STARLBRACKET hse_body LBRAC
+             | STARLBRACKET hse_guarded_cmd (THICKBAR hse_guarded_cmd)* LBRAC
              ;
 
 dir: PLUS
@@ -382,7 +383,7 @@ send_data: w_expr
          | LPAREN w_expr (COMMA w_expr)* RPAREN
          ;
 
-recv_stmt: expr_id QMARK recv_id
+recv_stmt: expr_id QUESTION recv_id
          ;
 
 recv_id: expr_id
@@ -393,16 +394,16 @@ assign_stmt: expr_id COLONEQUAL w_expr
            | expr_id dir
            ;
 
-select_stmt: LBRACKET guarded_cmd (THICKBAR guarded_cmd)* RBRACKET
-           | LBRACKET wbool_expr RBRACKET
+select_stmt: RBRAC guarded_cmd (THICKBAR guarded_cmd)* LBRAC
+           | RBRAC wbool_expr LBRAC
            ;
 
 guarded_cmd: wbool_expr RIGHTARROW chp_body
            | ELSE RIGHTARROW chp_body
            ;
 
-loop_stmt: STARLBRACKET chp_body RBRACKET
-         | STARLBRACKET guarded_cmd (THICKBAR guarded_cmd)* RBRACKET
+loop_stmt: STARLBRACKET chp_body LBRAC
+         | STARLBRACKET guarded_cmd (THICKBAR guarded_cmd)* LBRAC
          ;
 
 // $>
@@ -464,17 +465,7 @@ DEFCHAN
 	:	'defchan'
 	;
 
-RPAREN
-	:	')'
-	;
 
-LPAREN
-	:	'('
-	;
-
-SEMICOLON
-	:	';'
-	;
 
 DEFENUM
 	:	'defenum'
@@ -483,22 +474,8 @@ DEFENUM
 FUNCTION
 	:	'function'
 	;
-
-COLON
-	:	':'
-	;
-
-COMMA
-	:	','
-	;
-
-ISA
-	:	'<:'
-	;
-
-EQUAL
-	:	'='
-	;
+	
+ISA	:	'<:';
 
 METHODS
 	:	'methods'
@@ -506,18 +483,6 @@ METHODS
 
 TEMPLATE
 	:	'template'
-	;
-
-LT
-	:	'<'
-	;
-
-BAR
-	:	'|'
-	;
-
-GT
-	:	'>'
 	;
 
 PINT
@@ -548,14 +513,6 @@ HASH
 	:	'#'
 	;
 
-LBRACKET
-	:	'['
-	;
-
-RBRACKET
-	:	']'
-	;
-
 T_INT
 	:	'int'
 	;
@@ -582,20 +539,6 @@ ELSE
 
 THICKBAR
 	:	'[]'
-	;
-
-PLUS
-	:	'+'
-	;
-	
-
-
-QMARK
-	:	'?'
-	;
-
-BANG
-	:	'!'
 	;
 
 QMARKBANG
@@ -634,14 +577,6 @@ DOTDOT
 	:	'..'
 	;
 
-TRUE
-	:	'true'
-	;
-
-FALSE
-	:	'false'
-	;
-
 SKIP
 	:	'skip'
 	;
@@ -650,9 +585,6 @@ STARLBRACKET
 	:	'*['
 	;
 
-DASH
-	:	'-'
-	;
 
 COLONEQUAL
 	:	':='
@@ -662,17 +594,9 @@ DOLLARLPAREN
 	:	'$('
 	;
 	
+SEMICOLON
+	:	';';
 	
-ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
-    ;
-
-INT :	'0'..'9'+
-    ;
-
-STRING
-    :  '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
-    ;
-
 fragment
 HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
 
@@ -695,14 +619,179 @@ UNICODE_ESC
     :   '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
     ;
 
-COMMENT
-    :   '//' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;}
-    |   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+INC	: 	'++';
+DEC	:	'--';
+PLUSEQ	:	'+=';
+MINUSEQ	:	'-=';
+TIMESEQ	:	'*=';
+DIVEQ	:	'/=';
+ANDEQ	:	'&=';
+OREQ	:	'|=';
+XOREQ	:	'^=';
+MODEQ	:	'%=';
+EQUAL	:	'=';
+MOD	:	'%';
+DASH	:	'-';
+PLUS	:	'+';
+STAR	:	'*';
+SLASH	:	'/';
+LSHIFT	:	'<<';
+RSHIFT	:	'>>';
+ANDAND	:	'&&';
+OROR	:	'||';
+QUESTION	:	'?';
+COLON	:	':';
+AND	:	'&';
+OR	:	'|';
+HAT	:	'^';
+EQEQ	:	'==';
+NOTEQ	:	'!=';
+LEQ	:	'<=';
+GEQ	:	'>=';
+LT	:	'<';
+GT	:	'>';
+TRUE	:	'true';
+FALSE	:	'false';
+LBRAC	:	'[';
+RBRAC	:	']';
+LPAREN	:	'(';
+RPAREN	:	')';
+COMMA	:	',';
+	
+DecimalLiteral : ('0' | '1'..'9' '0'..'9'*) IntegerTypeSuffix? ;
+
+fragment
+IntegerTypeSuffix : ('l'|'L') ;
+
+FLOAT
+    :   ('0'..'9')+ '.' ('0'..'9')* Exponent? FloatTypeSuffix?
+    |   '.' ('0'..'9')+ Exponent? FloatTypeSuffix?
+    |   ('0'..'9')+ Exponent FloatTypeSuffix?
+    |   ('0'..'9')+ FloatTypeSuffix
     ;
 
-WS  :   ( ' '
-        | '\t'
-        | '\r'
-        | '\n'
-        ) {$channel=HIDDEN;}
+fragment
+Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
+
+fragment
+FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
+
+CHAR
+    :   '\'' ( EscapeSequence | ~('\''|'\\') ) '\''
+    ;
+
+STRING
+    :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+    ;
+
+fragment
+EscapeSequence
+    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+    |   OctalEscape
+    ;
+
+fragment
+OctalEscape
+    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7')
+    ;
+    
+ID 
+    :   LETTER (LETTER|DIGIT)*
+    ;
+
+/**I found this char range in JavaCC's grammar, but Letter and Digit overlap.
+   Still works, but...
+ */
+fragment
+LETTER
+    :  '\u0024' |
+       '\u0041'..'\u005a' |
+       '\u005f' |
+       '\u0061'..'\u007a' |
+       '\u00c0'..'\u00d6' |
+       '\u00d8'..'\u00f6' |
+       '\u00f8'..'\u00ff' |
+       '\u0100'..'\u1fff' |
+       '\u3040'..'\u318f' |
+       '\u3300'..'\u337f' |
+       '\u3400'..'\u3d2d' |
+       '\u4e00'..'\u9fff' |
+       '\uf900'..'\ufaff'
+    ;
+
+fragment
+DIGIT
+    :  '\u0030'..'\u0039' |
+       '\u0660'..'\u0669' |
+       '\u06f0'..'\u06f9' |
+       '\u0966'..'\u096f' |
+       '\u09e6'..'\u09ef' |
+       '\u0a66'..'\u0a6f' |
+       '\u0ae6'..'\u0aef' |
+       '\u0b66'..'\u0b6f' |
+       '\u0be7'..'\u0bef' |
+       '\u0c66'..'\u0c6f' |
+       '\u0ce6'..'\u0cef' |
+       '\u0d66'..'\u0d6f' |
+       '\u0e50'..'\u0e59' |
+       '\u0ed0'..'\u0ed9' |
+       '\u1040'..'\u1049'
+   ;
+
+WS  :  (' '|'\r'|'\t'|'\u000C'|'\n') {$channel=HIDDEN;}
+    ;
+
+COMMENT
+    :   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
+    ;
+
+LINE_COMMENT
+    : '//' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;}
     ;

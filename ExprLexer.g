@@ -1,5 +1,8 @@
 lexer grammar ExprLexer;
 
+
+TILDE:  '~';
+BANG:   '!';
 INC	: 	'++';
 DEC	:	'--';
 PLUSEQ	:	'+=';
@@ -10,7 +13,7 @@ ANDEQ	:	'&=';
 OREQ	:	'|=';
 XOREQ	:	'^=';
 MODEQ	:	'%=';
-
+EQUAL	:	'=';
 MOD	:	'%';
 DASH	:	'-';
 PLUS	:	'+';
@@ -21,7 +24,7 @@ RSHIFT	:	'>>';
 ANDAND	:	'&&';
 OROR	:	'||';
 QUESTION	:	'?';
-COLOR	:	':';
+COLON	:	':';
 AND	:	'&';
 OR	:	'|';
 HAT	:	'^';
@@ -35,15 +38,11 @@ TRUE	:	'true';
 FALSE	:	'false';
 LBRAC	:	'[';
 RBRAC	:	']';
-    
-HexLiteral : '0' ('x'|'X') HexDigit+ IntegerTypeSuffix? ;
-
+LPAREN	:	'(';
+RPAREN	:	')';
+COMMA	:	',';
+	
 DecimalLiteral : ('0' | '1'..'9' '0'..'9'*) IntegerTypeSuffix? ;
-
-OctalLiteral : '0' ('0'..'7')+ IntegerTypeSuffix? ;
-
-fragment
-HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;
 
 fragment
 IntegerTypeSuffix : ('l'|'L') ;
@@ -72,7 +71,6 @@ STRING
 fragment
 EscapeSequence
     :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
-    |   UnicodeEscape
     |   OctalEscape
     ;
 
@@ -81,11 +79,6 @@ OctalEscape
     :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
     |   '\\' ('0'..'7') ('0'..'7')
     |   '\\' ('0'..'7')
-    ;
-
-fragment
-UnicodeEscape
-    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
     ;
     
 ID 
